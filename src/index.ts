@@ -42,19 +42,20 @@ function crateIntegration(config: Config): AstroIntegration {
       "astro:config:setup": async () => {
         for (const collection of config.collections) {
           let remoteAssetsFile = "";
+          let typeDefinitions = `import type { ImageMetadata } from "astro";`;
+
           console.log(`Downloading pictures of ${collection.id}:`);
 
-          for (let i = 0; i < collection.pictures.length; i++) {
-            const picture = collection.pictures[i];
-            const assetId = `asset${i}`;
+          for (const picture of collection.pictures) {
             const url = new URL(picture.url);
             const fileType = url.pathname.split(".").pop();
 
             const filePath = `public/remote/${collection.id}-${picture.id}.${fileType}`;
             const isDownloaded = await fileExists(filePath);
 
-            remoteAssetsFile += `import ${assetId} from "../../${filePath}"\n`;
-            remoteAssetsFile += `export { ${assetId} as ${picture.id} }\n`;
+            remoteAssetsFile += `import ${picture.id} from "../../${filePath}"\n`;
+            remoteAssetsFile += `export { ${picture.id} }\n`;
+            typeDefinitions += `declare const ${picture.id}: ImageMetadata;\n`;
 
             if (isDownloaded) {
               console.log(`Skipping ${picture.id}`);
@@ -70,6 +71,20 @@ function crateIntegration(config: Config): AstroIntegration {
             remoteAssetsFile,
             "utf-8"
           );
+          await writeFile(
+            `node_modules/astro-remote-pictures/${collection.id}.d.ts`,
+            typeDefinitions,
+            "utf-8"
+          );
+
+          const importLine = `│ import * as ${collection.id} from "astro-remote-pictures/${collection.id}" │`;
+          const headerLine = `╭${"─".repeat(importLine.length - 2)}╮`;
+          const footerLine = `╰${"─".repeat(importLine.length - 2)}╯\n`;
+
+          console.log(`Collection ${collection.id} ready to use:`);
+          console.log(headerLine);
+          console.log(importLine);
+          console.log(footerLine);
         }
       },
     },
