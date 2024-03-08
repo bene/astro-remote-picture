@@ -24,7 +24,19 @@ async function downloadFile(
   filePath: string,
   options?: RequestInit
 ) {
-  const res = await fetch(url, options);
+  let res: Response;
+
+  try {
+    res = await fetch(url, options);
+    if (!res.ok) {
+      console.error(`Failed to download ${url}: ${res.statusText}`);
+      return;
+    }
+  } catch (error) {
+    console.error(`Failed to download ${url}: ${error}`);
+    return;
+  }
+
   const buffer = await res.arrayBuffer();
   const view = new DataView(buffer);
 
