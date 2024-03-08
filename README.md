@@ -1,6 +1,6 @@
 # astro-remote-pictures
 
-This plugin enables you to use dynamic images with the performance benefits of the `<Picture />` and `<Image />` components of Astro.
+This integration enables you to use dynamic images with the performance benefits of the `<Picture />` and `<Image />` components of Astro.
 
 ## Installation
 
@@ -10,7 +10,7 @@ npm i astro-remote-pictures
 
 ## Basic example
 
-This example just uses static URLs to demonstrate the basic usage of the plugin. It doesn't make much sense to use this plugin for static URLs, but it's a good starting point to understand how it works. See the dynamic example [below](#dynamic-example).
+This example just uses static URLs to demonstrate the basic usage of the integration. It doesn't make much sense to use this for static URLs, but it's a good starting point to understand how it works. See the dynamic example [below](#dynamic-example).
 
 ### Configuration
 
@@ -51,11 +51,11 @@ import { PolarBear } from "astro-remote-pictures/wallpapers";
 />
 ```
 
-The `PolarBear` import is a reference to the picture with the ID `PolarBear` from the `backgrounds` collection. The plugin automatically generates these references for you. The import path is always `astro-remote-pictures/$collectionId`.
+The `PolarBear` import is a reference to the picture with the ID `PolarBear` from the `backgrounds` collection. The integration automatically generates these references for you. The import path is always `astro-remote-pictures/$collectionId`.
 
 ## Dynamic example
 
-This plugin really starts to make sense once you want to use images dynamically fetched from an CMS or any other API.
+This integration really starts to make sense once you want to use images dynamically fetched from an CMS or any other API.
 
 ### Configuration
 
@@ -109,3 +109,7 @@ const wallpapers = fetch(...)
   />
 ))}
 ```
+
+### Notes
+
+You can move the `fetch` call to a separate file and import it in your Astro config file and the Astro component to remove code duplication.

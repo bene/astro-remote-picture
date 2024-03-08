@@ -12,7 +12,7 @@ export type Config = {
     id: string;
     pictures: RemotePicture[];
   }[];
-  fetchOptions?: RequestInit;
+  downloadOptions?: RequestInit;
 };
 
 async function fileExists(filePath: string) {
@@ -63,7 +63,7 @@ function crateIntegration(config: Config): AstroIntegration {
             }
 
             console.log(`Downloading ${picture.id}`);
-            await downloadFile(picture.url, filePath, config.fetchOptions);
+            await downloadFile(picture.url, filePath, config.downloadOptions);
           }
 
           await writeFile(
