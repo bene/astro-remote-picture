@@ -102,10 +102,10 @@ import * as wallpaperRefs from "astro-remote-pictures/wallpapers";
 const wallpapers = fetch(...)
 ---
 
-wallpapers.map(wallpaper => (
+{wallpapers.map(wallpaper => (
   <Picture
     src={wallpaperRefs[toPictureId(wallpaper.name)]}
     alt={wallpaper.name}
   />
-))
+))}
 ```
