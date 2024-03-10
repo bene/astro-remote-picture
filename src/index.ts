@@ -2,6 +2,14 @@ import type { AstroIntegration } from "astro";
 import { existsSync } from "fs";
 import { writeFile } from "fs/promises";
 
+declare global {
+  interface ImportMeta {
+    env: {
+      MODE: "development" | "production";
+    };
+  }
+}
+
 export type RemotePicture = {
   id: string;
   url: string;
@@ -93,10 +101,12 @@ function crateIntegration(config: Config): AstroIntegration {
           const headerLine = `╭${"─".repeat(importLine.length - 2)}╮`;
           const footerLine = `╰${"─".repeat(importLine.length - 2)}╯\n`;
 
-          console.log(`Collection ${collection.id} ready to use:`);
-          console.log(headerLine);
-          console.log(importLine);
-          console.log(footerLine);
+          if (import.meta.env.MODE === "development") {
+            console.log(`Collection ${collection.id} ready to use:`);
+            console.log(headerLine);
+            console.log(importLine);
+            console.log(footerLine);
+          }
         }
       },
     },
