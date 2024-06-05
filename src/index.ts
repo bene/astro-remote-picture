@@ -24,6 +24,8 @@ const {
       default: false,
     },
   },
+  allowPositionals: true,
+  strict: false,
 });
 
 async function downloadFile(
