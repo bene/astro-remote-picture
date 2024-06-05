@@ -1,6 +1,5 @@
 import type { AstroIntegration } from "astro";
-import { existsSync } from "fs";
-import { writeFile } from "fs/promises";
+import { parseArgs } from "util";
 
 export type RemotePicture = {
   id: string;
@@ -15,14 +14,22 @@ export type Config = {
   downloadOptions?: RequestInit;
 };
 
-async function fileExists(filePath: string) {
-  return existsSync(filePath);
-}
+const {
+  values: { "no-cache": noCache },
+} = parseArgs({
+  args: Bun.argv,
+  options: {
+    "no-cache": {
+      type: "boolean",
+      default: false,
+    },
+  },
+});
 
 async function downloadFile(
   url: string,
   filePath: string,
-  options?: RequestInit
+  options?: RequestInit,
 ) {
   let res: Response;
 
@@ -37,10 +44,7 @@ async function downloadFile(
     return;
   }
 
-  const buffer = await res.arrayBuffer();
-  const view = new DataView(buffer);
-
-  await writeFile(filePath, view);
+  await Bun.write(filePath, res);
 }
 
 export function createRemoteAssetId(collectionId: string, pictureId: string) {
@@ -63,13 +67,13 @@ function crateIntegration(config: Config): AstroIntegration {
             const fileType = url.pathname.split(".").pop();
 
             const filePath = `public/remote/${collection.id}-${picture.id}.${fileType}`;
-            const isDownloaded = await fileExists(filePath);
+            const isDownloaded = await Bun.file(filePath).exists();
 
             remoteAssetsFile += `import ${picture.id} from "../../${filePath}"\n`;
             remoteAssetsFile += `export { ${picture.id} }\n`;
             typeDefinitions += `declare const ${picture.id}: ImageMetadata;\n`;
 
-            if (isDownloaded) {
+            if (isDownloaded && !noCache) {
               console.log(`Skipping ${picture.id}`);
               continue;
             }
@@ -78,15 +82,13 @@ function crateIntegration(config: Config): AstroIntegration {
             await downloadFile(picture.url, filePath, config.downloadOptions);
           }
 
-          await writeFile(
+          await Bun.write(
             `node_modules/astro-remote-pictures/${collection.id}.js`,
             remoteAssetsFile,
-            "utf-8"
           );
-          await writeFile(
+          await Bun.write(
             `node_modules/astro-remote-pictures/${collection.id}.d.ts`,
             typeDefinitions,
-            "utf-8"
           );
 
           const importLine = `│ import * as ${collection.id} from "astro-remote-pictures/${collection.id}" │`;
@@ -120,7 +122,7 @@ export function toPictureId(name: string) {
     .map((part, index) =>
       index === 0
         ? part.toLowerCase()
-        : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+        : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase(),
     )
     .join("");
 
